@@ -16,11 +16,11 @@ class SignUpScreen extends ConsumerWidget {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         // resizeToAvoidBottomInset: false,
-        body: SingleChildScrollView(
-          child: Column(
+        body: Center(
+          child: Row(
             children: [
               SizedBox(
-                width: MediaQuery.of(context).size.width,
+                width: MediaQuery.of(context).size.width * 0.5,
                 height: MediaQuery.of(context).size.height * 0.5,
                 child: Image.asset(
                   'assets/login.png',
@@ -28,7 +28,7 @@ class SignUpScreen extends ConsumerWidget {
               ),
               Container(
                 height: MediaQuery.of(context).size.height * 0.4,
-                width: MediaQuery.of(context).size.width * 0.5,
+                width: MediaQuery.of(context).size.width * 0.3,
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +36,7 @@ class SignUpScreen extends ConsumerWidget {
                   children: [
                     const Center(
                       child: Text(
-                        'Create an Account',
+                        'Create an User',
                         style: TextStyle(
                             fontSize: 34, fontWeight: FontWeight.bold),
                       ),
@@ -55,27 +55,6 @@ class SignUpScreen extends ConsumerWidget {
                           hintText: 'Password',
                           hintStyle: TextStyle(fontSize: 14)),
                     ),
-                    Row(
-                      children: [
-                        const Text(
-                          "I already have an account  ",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            ref.read(isSignupProvider.notifier).state = false;
-                          },
-                          child: const Text(
-                            "Login",
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        )
-                      ],
-                    ),
                     const SizedBox(
                       height: 10,
                     ),
@@ -92,9 +71,12 @@ class SignUpScreen extends ConsumerWidget {
                         onPressed: () {
                           ref
                               .read(authprovider)
-                              .signup(email.text, password.text, context);
+                              .signup(email.text, password.text, context)
+                              .then((value) => ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
+                                      content: Text("Added new user!!"))));
                         },
-                        child: const Text('Sign up',
+                        child: const Text('Create User',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w600,

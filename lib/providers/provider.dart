@@ -37,6 +37,6 @@ final categoryProvider = StateProvider<String?>((ref) {
 });
 
 // get Products
-final getProductsProvider = StreamProvider<DocumentSnapshot<Products>>((ref) {
+final getProductsProvider = StreamProvider<QuerySnapshot<Products>>((ref) {
   return FirestoreService().getProducts();
 });

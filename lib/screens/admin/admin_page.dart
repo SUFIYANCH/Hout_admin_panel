@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hout_admin_panel/screens/add_products_page.dart';
-import 'package:hout_admin_panel/screens/home_page.dart';
+import 'package:hout_admin_panel/screens/admin/add_products_page.dart';
+import 'package:hout_admin_panel/screens/admin/home_page.dart';
+import 'package:hout_admin_panel/screens/admin/products_screen.dart';
+import 'package:hout_admin_panel/screens/signup_screen.dart';
 import 'package:hout_admin_panel/service/auth_service.dart';
 
 class AdminPage extends StatefulWidget {
@@ -23,13 +25,40 @@ class _AdminPageState extends State<AdminPage> {
       body: Row(
         children: [
           NavigationRail(
-            backgroundColor: Colors.amber,
+            backgroundColor: Colors.blue,
             selectedIndex: _selectedIndex,
+            selectedIconTheme: const IconThemeData(color: Colors.white),
+            unselectedIconTheme: const IconThemeData(color: Colors.black),
+            selectedLabelTextStyle: const TextStyle(color: Colors.white),
+            unselectedLabelTextStyle: const TextStyle(color: Colors.black),
             extended: true,
             onDestinationSelected: (int index) {
-              setState(() {
-                _selectedIndex = index;
-              });
+              if (index == 4) {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("Do you want to log out?"),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text("No")),
+                        TextButton(
+                            onPressed: () async {
+                              await AuthService().logout();
+                            },
+                            child: const Text("Yes")),
+                      ],
+                    );
+                  },
+                );
+              } else {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              }
             },
             destinations: const [
               NavigationRailDestination(
@@ -43,6 +72,10 @@ class _AdminPageState extends State<AdminPage> {
               NavigationRailDestination(
                 icon: Icon(Icons.explore),
                 label: Text('All Products'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.add),
+                label: Text('Add User'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.logout),
@@ -68,14 +101,9 @@ class _AdminPageState extends State<AdminPage> {
       case 1:
         return AddProductsPage();
       case 2:
-        return const Center(child: Text('Cart Page'));
+        return ProductsScreen();
       case 3:
-        return Center(
-            child: ElevatedButton(
-                onPressed: () async {
-                  await AuthService().logout();
-                },
-                child: const Text('Log Out')));
+        return SignUpScreen();
       default:
         return const Center(child: Text('Unknown Page'));
     }

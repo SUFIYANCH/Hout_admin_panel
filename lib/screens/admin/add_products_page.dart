@@ -4,6 +4,7 @@ import 'package:hout_admin_panel/modals/product_modal.dart';
 import 'package:hout_admin_panel/providers/provider.dart';
 import 'package:hout_admin_panel/service/firestore.dart';
 import 'package:hout_admin_panel/service/storage_service.dart';
+import 'package:hout_admin_panel/widgets/textfield_widget.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddProductsPage extends ConsumerWidget {
@@ -68,14 +69,17 @@ class AddProductsPage extends ConsumerWidget {
             height: 15,
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: productNameController,
             hinttext: "Product Name",
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: sellerNameController,
             hinttext: "Seller Name",
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: productDescriptionController,
             hinttext: "Product Description",
           ),
@@ -234,10 +238,12 @@ class AddProductsPage extends ConsumerWidget {
             height: 15,
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: mrpController,
             hinttext: "MRP",
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: offerPriceController,
             hinttext: "Offer Price",
           ),
@@ -263,22 +269,27 @@ class AddProductsPage extends ConsumerWidget {
             height: 15,
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: warrantyController,
             hinttext: "Warranty",
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: weightController,
             hinttext: "Weight",
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: brandController,
             hinttext: "Brand",
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: primaryMaterialController,
             hinttext: "Primary_material",
           ),
           CustomTextField(
+            width: MediaQuery.sizeOf(context).width * 0.5,
             controller: colorController,
             hinttext: "Color",
           ),
@@ -336,32 +347,6 @@ class AddProductsPage extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class CustomTextField extends StatelessWidget {
-  final String hinttext;
-  final TextEditingController? controller;
-  const CustomTextField(
-      {super.key, required this.hinttext, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: MediaQuery.sizeOf(context).width * 0.5,
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-                hintText: hinttext, border: const OutlineInputBorder()),
-          ),
-        ),
-        const SizedBox(
-          height: 15,
-        )
-      ],
     );
   }
 }

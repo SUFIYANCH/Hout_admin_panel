@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hout_admin_panel/providers/provider.dart';
+import 'package:hout_admin_panel/screens/admin/admin_page.dart';
 
 class LoginScreen extends ConsumerWidget {
   LoginScreen({super.key});
@@ -14,11 +15,13 @@ class LoginScreen extends ConsumerWidget {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         // resizeToAvoidBottomInset: false,
-        body: SingleChildScrollView(
-          child: Column(
+        body: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: MediaQuery.of(context).size.width,
+                width: MediaQuery.of(context).size.width * 0.5,
                 height: MediaQuery.of(context).size.height * 0.5,
                 child: Image.asset(
                   'assets/login.png',
@@ -26,7 +29,7 @@ class LoginScreen extends ConsumerWidget {
               ),
               Container(
                 height: MediaQuery.of(context).size.height * 0.5,
-                width: MediaQuery.of(context).size.width * 0.5,
+                width: MediaQuery.of(context).size.width * 0.3,
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,27 +62,6 @@ class LoginScreen extends ConsumerWidget {
                           hintText: 'Password',
                           hintStyle: TextStyle(fontSize: 14)),
                     ),
-                    Row(
-                      children: [
-                        const Text(
-                          "I don't have an account?  ",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            ref.read(isSignupProvider.notifier).state = true;
-                          },
-                          child: const Text(
-                            "Sign Up",
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        )
-                      ],
-                    ),
                     const SizedBox(
                       height: 10,
                     ),
@@ -96,7 +78,13 @@ class LoginScreen extends ConsumerWidget {
                         onPressed: () {
                           ref
                               .read(authprovider)
-                              .login(email.text, password.text, context);
+                              .login(email.text, password.text, context)
+                              .then((value) => Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const AdminPage(),
+                                  ),
+                                  (route) => false));
                         },
                         child: const Text('Login',
                             style: TextStyle(

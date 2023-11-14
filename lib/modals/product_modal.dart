@@ -41,7 +41,7 @@ class Products {
       name: data?["name"],
       seller: data?["seller"],
       description: data?["description"],
-      img: data?["img"],
+      img: List<String>.from(data?["img"]),
       mrp: data?["mrp"],
       offerprice: data?["offerprice"],
       roomType: data?["roomtype"],
