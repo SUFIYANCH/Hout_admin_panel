@@ -1,9 +1,12 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hout_admin_panel/modals/product_modal.dart';
 import 'package:hout_admin_panel/providers/provider.dart';
 import 'package:hout_admin_panel/service/firestore.dart';
+import 'package:hout_admin_panel/service/storage_service.dart';
 import 'package:hout_admin_panel/widgets/textfield_widget.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -22,6 +25,7 @@ class ProductsScreen extends ConsumerWidget {
   final TextEditingController primaryMaterialController =
       TextEditingController();
   final TextEditingController colorController = TextEditingController();
+
   final categoryList = [
     "Dining Table",
     "Chairs",
@@ -49,8 +53,6 @@ class ProductsScreen extends ConsumerWidget {
               return ListView.separated(
                   itemBuilder: (context, index) {
                     var datas = data.docs[index].data();
-                    log(datas.toString());
-
                     return Card(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -112,444 +114,7 @@ class ProductsScreen extends ConsumerWidget {
                                 ref.read(roomTypeProvider.notifier).state =
                                     datas.roomType;
 
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title:
-                                            const Text("Update the products"),
-                                        content: SingleChildScrollView(
-                                          child: Column(
-                                            children: [
-                                              SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.3,
-                                                child: DropdownButtonFormField(
-                                                  decoration: const InputDecoration(
-                                                      border:
-                                                          OutlineInputBorder()),
-                                                  isExpanded: true,
-                                                  icon: const Icon(Icons
-                                                      .keyboard_arrow_down),
-                                                  value: ref
-                                                      .watch(categoryProvider),
-                                                  hint: const Text("Category"),
-                                                  items: categoryList
-                                                      .map((String items) {
-                                                    return DropdownMenuItem(
-                                                      value: items,
-                                                      child: Text(items),
-                                                    );
-                                                  }).toList(),
-                                                  onChanged:
-                                                      (String? newValue) {
-                                                    ref
-                                                        .read(categoryProvider
-                                                            .notifier)
-                                                        .state = newValue;
-                                                  },
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 15,
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller:
-                                                    productNameController,
-                                                hinttext: "Product Name",
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller:
-                                                    sellerNameController,
-                                                hinttext: "Seller Name",
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller:
-                                                    productDescriptionController,
-                                                hinttext: "Product Description",
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Container(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            10),
-                                                    decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                            width: 1),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20)),
-                                                    child: Column(
-                                                      children: [
-                                                        const Text(
-                                                          'Add image (1)',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        InkWell(
-                                                          onTap: () async {
-                                                            try {
-                                                              final pickedImage1 =
-                                                                  await ImagePicker()
-                                                                      .pickImage(
-                                                                          source:
-                                                                              ImageSource.gallery);
-
-                                                              if (pickedImage1 !=
-                                                                  null) {
-                                                                var img1 =
-                                                                    pickedImage1
-                                                                        .readAsBytes();
-
-                                                                ref
-                                                                    .read(img1Provider
-                                                                        .notifier)
-                                                                    .state = await img1;
-                                                              } else {
-                                                                if (context
-                                                                    .mounted) {
-                                                                  ScaffoldMessenger.of(
-                                                                          context)
-                                                                      .showSnackBar(const SnackBar(
-                                                                          content:
-                                                                              Text("No image is selected")));
-                                                                }
-                                                              }
-                                                            } catch (e) {
-                                                              Text(
-                                                                  e.toString());
-                                                            }
-                                                          },
-                                                          child: Container(
-                                                              height: 100,
-                                                              width: 100,
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(10),
-                                                              child: ref.watch(
-                                                                          img1Provider) ==
-                                                                      null
-                                                                  ? Image.network(
-                                                                      datas.img[
-                                                                          0])
-                                                                  : Image
-                                                                      .memory(
-                                                                      ref.watch(
-                                                                          img1Provider)!,
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                    )),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 15,
-                                                  ),
-                                                  Container(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            10),
-                                                    decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                            width: 1),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20)),
-                                                    child: Column(
-                                                      children: [
-                                                        const Text(
-                                                          'Add image (2)',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        InkWell(
-                                                          onTap: () async {
-                                                            try {
-                                                              final pickedImage2 =
-                                                                  await ImagePicker()
-                                                                      .pickImage(
-                                                                          source:
-                                                                              ImageSource.gallery);
-                                                              if (pickedImage2 !=
-                                                                  null) {
-                                                                var img2 =
-                                                                    pickedImage2
-                                                                        .readAsBytes();
-
-                                                                ref
-                                                                    .read(img2Provider
-                                                                        .notifier)
-                                                                    .state = await img2;
-                                                              } else {
-                                                                if (context
-                                                                    .mounted) {
-                                                                  ScaffoldMessenger.of(
-                                                                          context)
-                                                                      .showSnackBar(const SnackBar(
-                                                                          content:
-                                                                              Text("No image is selected")));
-                                                                }
-                                                              }
-                                                            } catch (e) {
-                                                              Text(
-                                                                  e.toString());
-                                                            }
-                                                          },
-                                                          child: Container(
-                                                              height: 100,
-                                                              width: 100,
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(10),
-                                                              child: ref.watch(
-                                                                          img2Provider) ==
-                                                                      null
-                                                                  ? Image.network(
-                                                                      datas.img[
-                                                                          1])
-                                                                  : Image
-                                                                      .memory(
-                                                                      ref.watch(
-                                                                          img2Provider)!,
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                    )),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 15,
-                                                  ),
-                                                  Container(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            10),
-                                                    decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                            width: 1),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20)),
-                                                    child: Column(
-                                                      children: [
-                                                        const Text(
-                                                          'Add image (3)',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        InkWell(
-                                                          onTap: () async {
-                                                            try {
-                                                              final pickedImage3 =
-                                                                  await ImagePicker()
-                                                                      .pickImage(
-                                                                          source:
-                                                                              ImageSource.gallery);
-
-                                                              if (pickedImage3 !=
-                                                                  null) {
-                                                                var img3 =
-                                                                    pickedImage3
-                                                                        .readAsBytes();
-
-                                                                ref
-                                                                    .read(img3Provider
-                                                                        .notifier)
-                                                                    .state = await img3;
-                                                              } else {
-                                                                if (context
-                                                                    .mounted) {
-                                                                  ScaffoldMessenger.of(
-                                                                          context)
-                                                                      .showSnackBar(const SnackBar(
-                                                                          content:
-                                                                              Text("No image is selected")));
-                                                                }
-                                                              }
-                                                            } catch (e) {
-                                                              Text(
-                                                                  e.toString());
-                                                            }
-                                                          },
-                                                          child: Container(
-                                                              height: 100,
-                                                              width: 100,
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(10),
-                                                              child: ref.watch(
-                                                                          img3Provider) ==
-                                                                      null
-                                                                  ? Image.network(
-                                                                      datas.img[
-                                                                          2])
-                                                                  : Image
-                                                                      .memory(
-                                                                      ref.watch(
-                                                                          img3Provider)!,
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                    )),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 15,
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller: mrpController,
-                                                hinttext: "MRP",
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller:
-                                                    offerPriceController,
-                                                hinttext: "Offer Price",
-                                              ),
-                                              SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.3,
-                                                child: DropdownButtonFormField(
-                                                  decoration: const InputDecoration(
-                                                      border:
-                                                          OutlineInputBorder()),
-                                                  isExpanded: true,
-                                                  value: ref
-                                                      .watch(roomTypeProvider),
-                                                  hint: const Text("Room Type"),
-                                                  icon: const Icon(Icons
-                                                      .keyboard_arrow_down),
-                                                  items: roomTypeList
-                                                      .map((String items) {
-                                                    return DropdownMenuItem(
-                                                      value: items,
-                                                      child: Text(items),
-                                                    );
-                                                  }).toList(),
-                                                  onChanged:
-                                                      (String? newValue) {
-                                                    ref
-                                                        .read(roomTypeProvider
-                                                            .notifier)
-                                                        .state = newValue;
-                                                  },
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 13,
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller: warrantyController,
-                                                hinttext: "Warranty",
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller: weightController,
-                                                hinttext: "Weight",
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller: brandController,
-                                                hinttext: "Brand",
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller:
-                                                    primaryMaterialController,
-                                                hinttext: "Primary_material",
-                                              ),
-                                              CustomTextField(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.3,
-                                                controller: colorController,
-                                                hinttext: "Color",
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text(
-                                                "Cancel",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 18),
-                                              )),
-                                          TextButton(
-                                              onPressed: () {},
-                                              child: const Text(
-                                                "Update",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 18),
-                                              ))
-                                        ],
-                                      );
-                                    });
+                                buildUpdateDialog(context, datas, data, index);
                               },
                               icon: const Icon(Icons.edit),
                               label: const Text("Edit")),
@@ -601,5 +166,377 @@ class ProductsScreen extends ConsumerWidget {
             ),
           ),
     );
+  }
+
+  Future<dynamic> buildUpdateDialog(BuildContext context, Products datas,
+      QuerySnapshot<Products> data, int index) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return Consumer(builder: (context, ref, _) {
+            return AlertDialog(
+              title: const Text("Update the products"),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      child: DropdownButtonFormField(
+                        decoration:
+                            const InputDecoration(border: OutlineInputBorder()),
+                        isExpanded: true,
+                        icon: const Icon(Icons.keyboard_arrow_down),
+                        value: ref.watch(categoryProvider),
+                        hint: const Text("Category"),
+                        items: categoryList.map((String items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Text(items),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          ref.read(categoryProvider.notifier).state = newValue;
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: productNameController,
+                      hinttext: "Product Name",
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: sellerNameController,
+                      hinttext: "Seller Name",
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: productDescriptionController,
+                      hinttext: "Product Description",
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              border: Border.all(width: 1),
+                              borderRadius: BorderRadius.circular(20)),
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Add image (1)',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              InkWell(
+                                onTap: () async {
+                                  try {
+                                    final pickedImage1 = await ImagePicker()
+                                        .pickImage(source: ImageSource.gallery);
+
+                                    if (pickedImage1 != null) {
+                                      var img1 = pickedImage1.readAsBytes();
+
+                                      ref.read(img1Provider.notifier).state =
+                                          await img1;
+                                    } else {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                                content: Text(
+                                                    "No image is selected")));
+                                      }
+                                    }
+                                  } catch (e) {
+                                    Text(e.toString());
+                                  }
+                                },
+                                child: Container(
+                                    height: 100,
+                                    width: 100,
+                                    padding: const EdgeInsets.all(10),
+                                    child: ref.watch(img1Provider) == null
+                                        ? Image.network(datas.img[0])
+                                        : Image.memory(
+                                            ref.watch(img1Provider)!,
+                                            fit: BoxFit.cover,
+                                          )),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              border: Border.all(width: 1),
+                              borderRadius: BorderRadius.circular(20)),
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Add image (2)',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              InkWell(
+                                onTap: () async {
+                                  print(datas.img[1]);
+                                  try {
+                                    final pickedImage2 = await ImagePicker()
+                                        .pickImage(source: ImageSource.gallery);
+                                    if (pickedImage2 != null) {
+                                      var img2 = pickedImage2.readAsBytes();
+
+                                      ref.read(img2Provider.notifier).state =
+                                          await img2;
+                                    } else {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                                content: Text(
+                                                    "No image is selected")));
+                                      }
+                                    }
+                                  } catch (e) {
+                                    Text(e.toString());
+                                  }
+                                },
+                                child: Container(
+                                    height: 100,
+                                    width: 100,
+                                    padding: const EdgeInsets.all(10),
+                                    child: ref.watch(img2Provider) == null
+                                        ? Image.network(datas.img[1])
+                                        : Image.memory(
+                                            ref.watch(img2Provider)!,
+                                            fit: BoxFit.cover,
+                                          )),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              border: Border.all(width: 1),
+                              borderRadius: BorderRadius.circular(20)),
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Add image (3)',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              InkWell(
+                                onTap: () async {
+                                  try {
+                                    final pickedImage3 = await ImagePicker()
+                                        .pickImage(source: ImageSource.gallery);
+
+                                    if (pickedImage3 != null) {
+                                      var img3 = pickedImage3.readAsBytes();
+
+                                      ref.read(img3Provider.notifier).state =
+                                          await img3;
+                                    } else {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                                content: Text(
+                                                    "No image is selected")));
+                                      }
+                                    }
+                                  } catch (e) {
+                                    Text(e.toString());
+                                  }
+                                },
+                                child: Container(
+                                    height: 100,
+                                    width: 100,
+                                    padding: const EdgeInsets.all(10),
+                                    child: ref.watch(img3Provider) == null
+                                        ? Image.network(datas.img[2])
+                                        : Image.memory(
+                                            ref.watch(img3Provider)!,
+                                            fit: BoxFit.cover,
+                                          )),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: mrpController,
+                      hinttext: "MRP",
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: offerPriceController,
+                      hinttext: "Offer Price",
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      child: DropdownButtonFormField(
+                        decoration:
+                            const InputDecoration(border: OutlineInputBorder()),
+                        isExpanded: true,
+                        value: ref.watch(roomTypeProvider),
+                        hint: const Text("Room Type"),
+                        icon: const Icon(Icons.keyboard_arrow_down),
+                        items: roomTypeList.map((String items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Text(items),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          ref.read(roomTypeProvider.notifier).state = newValue;
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 13,
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: brandController,
+                      hinttext: "Brand",
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: warrantyController,
+                      hinttext: "Warranty",
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: weightController,
+                      hinttext: "Weight",
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: brandController,
+                      hinttext: "Brand",
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: primaryMaterialController,
+                      hinttext: "Primary_material",
+                    ),
+                    CustomTextField(
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      controller: colorController,
+                      hinttext: "Color",
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      "Cancel",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    )),
+                TextButton(
+                    onPressed: () async {
+                      log(
+                        ref.watch(img2Provider).toString(),
+                      );
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                      ).then((value) => Navigator.pop(context));
+                      try {
+                        String dwnldimg1 = ref.watch(img1Provider) != null
+                            ? await Storage.updateImage(
+                                ref.watch(img1Provider)!,
+                                "png",
+                                ref.watch(categoryProvider)!,
+                                datas.img[0])
+                            : datas.img[0];
+
+                        String dwnldimg2 = ref.watch(img2Provider) != null
+                            ? await Storage.updateImage(
+                                ref.watch(img2Provider)!,
+                                "png",
+                                ref.watch(categoryProvider)!,
+                                datas.img[1])
+                            : datas.img[1];
+                        String dwnldimg3 = ref.watch(img3Provider) != null
+                            ? await Storage.updateImage(
+                                ref.watch(img3Provider)!,
+                                "png",
+                                ref.watch(categoryProvider)!,
+                                datas.img[2])
+                            : datas.img[2];
+                        // log("before update \n${ref.watch(categoryProvider)}\n ${productNameController.text} \n ${sellerNameController.text} \n ${productDescriptionController.text} \n $dwnldimg1 \n $dwnldimg2 \n $dwnldimg3 \n ${mrpController.text} \n ${offerPriceController.text}");
+                        // log("${ref.watch(roomTypeProvider)}\n");
+                        await FirestoreService()
+                            .updateProducts(
+                                Products(
+                                    category: ref.watch(categoryProvider),
+                                    name: productNameController.text,
+                                    seller: sellerNameController.text,
+                                    description:
+                                        productDescriptionController.text,
+                                    img: [dwnldimg1, dwnldimg2, dwnldimg3],
+                                    mrp: mrpController.text,
+                                    offerprice: offerPriceController.text,
+                                    roomType: ref.watch(roomTypeProvider),
+                                    warranty: warrantyController.text,
+                                    weight: weightController.text,
+                                    brand: brandController.text,
+                                    material: primaryMaterialController.text,
+                                    color: colorController.text),
+                                data.docs[index].id)
+                            .then((value) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text("Products Updated Successfully!!")));
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        });
+                      } catch (e) {
+                        log("error is : ${e.toString()}");
+                      }
+                    },
+                    child: const Text(
+                      "Update",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ))
+              ],
+            );
+          });
+        });
   }
 }

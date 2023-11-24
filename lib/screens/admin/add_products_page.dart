@@ -222,7 +222,7 @@ class AddProductsPage extends ConsumerWidget {
                       },
                       child: Container(
                           padding: const EdgeInsets.all(10),
-                          child: ref.read(img3Provider) == null
+                          child: ref.watch(img3Provider) == null
                               ? const Placeholder()
                               : Image.memory(
                                   ref.watch(img3Provider)!,

@@ -12,4 +12,16 @@ class Storage {
     await ref.putData(file, SettableMetadata(contentType: "image/$ext"));
     return await ref.getDownloadURL();
   }
+
+  static Future<String> updateImage(
+      Uint8List newFile, String ext, String category, String imageUrl) async {
+    final oldRef = storage.refFromURL(imageUrl);
+    await oldRef.delete();
+
+    // Upload the new image
+    final time = DateTime.now().millisecondsSinceEpoch;
+    final newRef = storage.ref().child("products/$category/$time.$ext");
+    await newRef.putData(newFile, SettableMetadata(contentType: "image/$ext"));
+    return await newRef.getDownloadURL(); // You can return this URL if needed
+  }
 }

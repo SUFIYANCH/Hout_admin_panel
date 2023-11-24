@@ -8,19 +8,19 @@ class FirestoreService {
           fromFirestore: Products.fromFirestore,
           toFirestore: (value, options) => value.toFirestore());
 
-  Future<DocumentReference<Products>> addProducts(Products data) async {
-    return await firestore.add(data);
+  Future<DocumentReference<Products>> addProducts(Products data) {
+    return firestore.add(data);
   }
 
   Stream<QuerySnapshot<Products>> getProducts() {
     return firestore.snapshots();
   }
 
-  Future<void> updateProducts(Products updatedata, String id) async {
-    return await firestore.doc(id).set(updatedata);
+  Future<void> updateProducts(Products updatedata, String id) {
+    return firestore.doc(id).set(updatedata);
   }
 
-  Future<void> deleteProducts(String id) async {
-    return await firestore.doc(id).delete();
+  Future<void> deleteProducts(String id) {
+    return firestore.doc(id).delete();
   }
 }
